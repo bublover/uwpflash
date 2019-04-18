@@ -109,6 +109,9 @@ int set_parity(int fd,int databits,int stopbits,int parity)
 	} 
 	options.c_cflag |= (CLOCAL | CREAD);
 	options.c_cflag &= ~CRTSCTS;
+	options.c_cflag &= ~ONLCR;
+	options.c_lflag  &= ~(ICANON | ECHO | ECHOE | ISIG);  /*Input*/
+	options.c_oflag  &= ~OPOST;   /*Output*/
 
 	/* Set input parity option */ 
 	if (parity != 'n')
@@ -123,8 +126,6 @@ int set_parity(int fd,int databits,int stopbits,int parity)
 		perror("SetupSerial 3");   
 		return -1;
 	} 
-	options.c_lflag  &= ~(ICANON | ECHO | ECHOE | ISIG);  /*Input*/
-	options.c_oflag  &= ~OPOST;   /*Output*/
 
 	return 0;
 }
