@@ -6,9 +6,10 @@
 #include "command.h"
 #include "interface.h"
 #include "download.h"
-#include "fdl.h"
+#include "fdl_5661.h"
+#include "fdl_5662.h"
 
-#define VERSION	"v0.0.2"
+#define VERSION	"v0.0.3"
 #define AUTHOR "Dong Xiang <dong.xiang@unisoc.com>"
 
 struct fobject {
@@ -44,12 +45,16 @@ int fobj_insert(struct fobject **flist, struct fobject *fobj)
 struct params {
 	char *dev;
 	char *intf_type;
+	char *chip;
+	unsigned char *fdl;
+	unsigned int fdl_len;
 	struct fobject *flist;
 };
 
 static struct params params = {
 	.intf_type = "UART",
 	.dev = "/dev/ttyUSB0",
+	.chip = "5661",
 	.flist = NULL,
 };
 
@@ -61,6 +66,8 @@ void help(void) {
 	printf("\t\t default: UART\n");
 	printf("-d <dev> \t device name.\n");
 	printf("\t\t default: /dev/ttyUSB0\n");
+	printf("-c <chip>\t chip name.\n");
+	printf("\t\t default: 5661\n");
 	printf("-f <file>\t image file name.\n");
 	printf("-a <address>\t flash address.\n");
 
@@ -75,9 +82,9 @@ int main(int argc,char **argv)
 	opterr = -1;
 
 	printf("UNISOC uwpflash tool.\n");
-	printf("Version:\t" VERSION "\n");
+	printf("Version: " VERSION "\n");
 
-	while ((opt = getopt (argc, argv, "t:d:vf:a:h")) != -1) {
+	while ((opt = getopt (argc, argv, "t:d:vc:f:a:h")) != -1) {
 		switch (opt) {
 			case 'h':
 				help();
@@ -87,6 +94,9 @@ int main(int argc,char **argv)
 				break;
 			case 'v':
 				printf("UNISOC uwpflash tool v" VERSION "\n");
+				break;
+			case 'c':
+				p->chip = optarg;
 				break;
 			case 'd':
 				p->dev = optarg;
@@ -121,6 +131,14 @@ int main(int argc,char **argv)
 		help();
 	}
 
+	if (strcmp(p->chip, "5661") == 0) {
+		p->fdl = fdl_5661;
+		p->fdl_len = sizeof(fdl_5661);
+	} else if (strcmp(p->chip, "5662") == 0) {
+		p->fdl = fdl_5662;
+		p->fdl_len = sizeof(fdl_5662);
+	}
+
 	ret = intf_init(p->intf_type, p->dev);
 	if (ret < 0) {
 		perror("init interface failed");
@@ -141,7 +159,7 @@ int main(int argc,char **argv)
 	}
 	
 
-	ret = dl_flash_fdl(fdl, sizeof(fdl), 0x100000);
+	ret = dl_flash_fdl(p->fdl, p->fdl_len, 0x100000);
 	if (ret < 0) {
 		printf("download file failed.\n");
 		return ret;

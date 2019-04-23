@@ -9,16 +9,22 @@
 
 #define FILE_IN  "fdl.bin"
 #define FILE_OUT "fdl.h"
+#define BUF_SIZE 128
 
 static int fd_in;
 static int fd_out;
-char str_header[] = "#ifndef _FDL_H__\nchar fdl[] = {\n";
+char str_header[] = "#ifndef _FDL_%s_H__\nchar fdl_%s[] = {\n";
 char str_tail[] = "};\n#endif\n";
+char *str_chip = "NONE";
+char buf[BUF_SIZE];
 
 int main(int argc, char **argv)
 {
 	int i;
 	int ret;
+
+	if (argc > 1)
+		str_chip = argv[1];
 
 	fd_in = open(FILE_IN, O_RDONLY);
 	if (fd_in < 0) {
@@ -26,19 +32,20 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
-
-	fd_out = open(FILE_OUT, O_WRONLY);
+	fd_out = open(FILE_OUT, O_RDWR | O_CREAT | O_TRUNC, 0644);
 	if (fd_out < 0) {
 		perror("file");
 		return -1;
 	}
 
-	write(fd_out, str_header, strlen(str_header));
+	memset(buf, 0, BUF_SIZE);
+	snprintf(buf, BUF_SIZE, str_header, str_chip, str_chip);
+
+	write(fd_out, buf, strlen(buf));
 
 	unsigned char c;
 	unsigned int len;
 	i = 0;
-	char buf[128];
 	while (1) {
 		len = read(fd_in, &c, 1);
 
@@ -47,7 +54,7 @@ int main(int argc, char **argv)
 			break;
 		}
 
-		sprintf(buf, "0x%02x, ", c);
+		snprintf(buf, BUF_SIZE, "0x%02x, ", c);
 		
 		write(fd_out, buf, 6);
 		i++;
@@ -58,5 +65,6 @@ int main(int argc, char **argv)
 	}
 	write(fd_out, str_tail, strlen(str_tail));
 
+	close(fd_in);
 	close(fd_out);
 }

@@ -13,7 +13,7 @@
 #include "command.h"
 #include "interface.h"
 
-#define MAX_DATA_LEN 1024
+#define MAX_DATA_LEN 2048
 #define RECV_BUF_LEN 1024
 #define MAX_PERCENT	(50)
 #define CHECK_BANDRATE_TIME_SEC	(10)
@@ -152,7 +152,7 @@ int dl_flash(int is_fdl)
 	ret = dl_send_data();
 	if (ret < 0) return ret;
 
-	printf("\n* STOP...\t\t\t");
+	printf("\n* FLASH...\t\t\t");
 	fflush(stdout);
 	ret = cmd_stop(20);
 	if (ret < 0) return ret;
