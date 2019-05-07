@@ -197,17 +197,20 @@ int uart_init(char *dev)
 
 	return 0;
 }
+
+extern unsigned char debug_mode(void);
 int uart_send(char *data, int len)
 {
 	int send;
-#if 0
 	int i;
-	printf("uart send %d bytes.\n", len);
-	for(i = 0; i < len; i++) {
-		printf("%02x ", (unsigned char)data[i]);
+
+	if (debug_mode()) {
+		printf("uart send %d bytes.\n", len);
+		for(i = 0; i < len; i++) {
+			printf("%02x ", (unsigned char)data[i]);
+		}
+		printf("\n");
 	}
-	printf("\n");
-#endif
 	send = write(tty_fd, data, len);
 	if (send == len)
 		return 0;
@@ -222,15 +225,15 @@ int uart_recv(char *buf, int len)
 
 	readlen = read(tty_fd, buf, len);
 
-#if 0
-	printf("uart recv %d bytes.\n", readlen);
-	if (readlen > 0) {
-		for(i = 0; i < readlen; i++) {
-			printf("%02x ", (unsigned char)buf[i]);
+	if (debug_mode()) {
+		printf("uart recv %d bytes.\n", readlen);
+		if (readlen > 0) {
+			for(i = 0; i < readlen; i++) {
+				printf("%02x ", (unsigned char)buf[i]);
+			}
+			printf("\n");
 		}
-		printf("\n");
 	}
-#endif
 	return readlen;
 }
 

@@ -16,7 +16,7 @@
 #define MAX_DATA_LEN 2048
 #define RECV_BUF_LEN 1024
 #define MAX_PERCENT	(50)
-#define CHECK_BANDRATE_TIME_SEC	(10)
+#define CHECK_BANDRATE_TIME_SEC	(20)
 
 struct dl_file
 {
@@ -135,6 +135,9 @@ int dl_flash(int is_fdl)
 {
 	int ret;
 
+	ret = dl_check_bandrate();
+	if (ret < 0) return ret;
+
 	printf("* CONNECTING...\t\t\t");
 	fflush(stdout);
 	ret = cmd_connect(5);
@@ -186,9 +189,6 @@ int dl_flash_fdl(unsigned char *fdl, unsigned int len, unsigned int addr)
 
 	printf("download FDL (%d bytes)\n", pfile->len);
 
-	ret = dl_check_bandrate();
-	if (ret < 0) return ret;
-
 	return dl_flash(1);
 }
 
@@ -214,7 +214,6 @@ int dl_flash_file(char *fname, unsigned int addr)
 
 	printf("download file %s (%d bytes)\n", fname, pfile->len);
 
-	
 	return dl_flash(0);
 }
 

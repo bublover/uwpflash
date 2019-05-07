@@ -9,7 +9,7 @@
 #include "fdl_5661.h"
 #include "fdl_5662.h"
 
-#define VERSION	"v0.0.3"
+#define VERSION	"v0.0.4"
 #define AUTHOR "Dong Xiang <dong.xiang@unisoc.com>"
 
 struct fobject {
@@ -49,6 +49,7 @@ struct params {
 	unsigned char *fdl;
 	unsigned int fdl_len;
 	struct fobject *flist;
+	unsigned char debug_mode;
 };
 
 static struct params params = {
@@ -62,6 +63,7 @@ static struct fobject *fobj;
 
 void help(void) {
 	printf("-h\t\t show this message.\n");
+	printf("-D\t\t Debug mode.\n");
 	printf("-t <type>\t interface type.\n");
 	printf("\t\t default: UART\n");
 	printf("-d <dev> \t device name.\n");
@@ -74,6 +76,11 @@ void help(void) {
 	exit(0);
 }
 
+unsigned char debug_mode(void)
+{
+	return params.debug_mode;
+}
+
 int main(int argc,char **argv)
 {
 	struct params *p = &params;
@@ -84,10 +91,13 @@ int main(int argc,char **argv)
 	printf("UNISOC uwpflash tool.\n");
 	printf("Version: " VERSION "\n");
 
-	while ((opt = getopt (argc, argv, "t:d:vc:f:a:h")) != -1) {
+	while ((opt = getopt (argc, argv, "t:d:vc:f:a:h:D")) != -1) {
 		switch (opt) {
 			case 'h':
 				help();
+				break;
+			case 'D':
+				p->debug_mode = 1;
 				break;
 			case 't':
 				p->intf_type = optarg;
