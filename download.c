@@ -135,8 +135,10 @@ int dl_flash(int is_fdl)
 {
 	int ret;
 
-	ret = dl_check_bandrate();
-	if (ret < 0) return ret;
+	if (is_fdl) {
+		ret = dl_check_bandrate();
+		if (ret < 0) return ret;
+	}
 
 	printf("* CONNECTING...\t\t\t");
 	fflush(stdout);
