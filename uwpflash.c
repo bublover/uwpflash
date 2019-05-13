@@ -6,8 +6,6 @@
 #include "command.h"
 #include "interface.h"
 #include "download.h"
-#include "fdl_5661.h"
-#include "fdl_5662.h"
 
 #define VERSION	"v0.0.4"
 #define AUTHOR "Dong Xiang <dong.xiang@unisoc.com>"
@@ -76,11 +74,17 @@ void help(void) {
 	exit(0);
 }
 
+void about(void) {
+	printf("Version: " VERSION "\n");
+	printf("Author: " AUTHOR "\n");
+}
+
 unsigned char debug_mode(void)
 {
 	return params.debug_mode;
 }
 
+#ifndef BUILD_LIB
 int main(int argc,char **argv)
 {
 	struct params *p = &params;
@@ -141,14 +145,6 @@ int main(int argc,char **argv)
 		help();
 	}
 
-	if (strcmp(p->chip, "5661") == 0) {
-		p->fdl = fdl_5661;
-		p->fdl_len = sizeof(fdl_5661);
-	} else if (strcmp(p->chip, "5662") == 0) {
-		p->fdl = fdl_5662;
-		p->fdl_len = sizeof(fdl_5662);
-	}
-
 	ret = intf_init(p->intf_type, p->dev);
 	if (ret < 0) {
 		perror("init interface failed");
@@ -169,7 +165,7 @@ int main(int argc,char **argv)
 	}
 	
 
-	ret = dl_flash_fdl(p->fdl, p->fdl_len, 0x100000);
+	ret = dl_flash_fdl(p->chip, 0x100000);
 	if (ret < 0) {
 		printf("download file failed.\n");
 		return ret;
@@ -185,3 +181,4 @@ int main(int argc,char **argv)
 
 	return 0;
 }
+#endif

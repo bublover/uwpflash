@@ -12,6 +12,8 @@
 
 #include "command.h"
 #include "interface.h"
+#include "fdl_5661.h"
+#include "fdl_5662.h"
 
 #define MAX_DATA_LEN 2048
 #define RECV_BUF_LEN 1024
@@ -178,16 +180,23 @@ int dl_flash(int is_fdl)
 	return 0;
 }
 
-int dl_flash_fdl(unsigned char *fdl, unsigned int len, unsigned int addr)
+int dl_flash_fdl(unsigned char *chip, unsigned int addr)
 {
 	int ret;
 	struct dl_file *pfile = &dl_file;
 
 	memset((void*)pfile, 0, sizeof(struct dl_file));
+
+	if (strcmp(chip, "5661") == 0) {
+		pfile->fdl_buf = fdl_5661;
+		pfile->len = sizeof(fdl_5661);
+	} else if (strcmp(chip, "5662") == 0) {
+		pfile->fdl_buf = fdl_5662;
+		pfile->len = sizeof(fdl_5662);
+	}
+
 	pfile->is_fdl = 1;
 	pfile->addr = addr;
-	pfile->len = len;
-	pfile->fdl_buf = fdl;
 
 	printf("download FDL (%d bytes)\n", pfile->len);
 
